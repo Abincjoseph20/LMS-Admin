@@ -189,9 +189,8 @@ def login(request):
                 # Redirect based on role
                 if user.is_superadmin:
                     return redirect('admin_dashboard')
-                elif user.roles == 'teacher':
-                    return redirect('teacher_dashboard')
-                    
+                elif user.roles == 'Teacher':
+                    return redirect('teacher_dashboard')                    
                 elif user.roles == 'student':
                     return redirect('student_dashboard')
                 elif user.roles == 'Parent':
@@ -206,8 +205,6 @@ def login(request):
     else:
         form = LoginForm()   
     return render(request, 'registration/login1.html', {'form': form})
-
-
 
 
 def logout_view(request):
