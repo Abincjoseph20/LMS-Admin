@@ -212,11 +212,6 @@ class UserCourses(models.Model):
     
     
 
-
-    
-    
-    
-
 class CourseResource(models.Model):
     RESOURCE_TYPE = (
         ('Note', 'Note'),
