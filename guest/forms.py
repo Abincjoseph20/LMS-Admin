@@ -1,5 +1,5 @@
 from django import forms
-from .models import Guest_ProfilePermission
+from .models import Guest_ProfilePermission,Categories
 from adminapp.models import Account
 
 class Guest_ProfilePermissionForm(forms.ModelForm):
@@ -15,4 +15,7 @@ class Guest_ProfilePermissionForm(forms.ModelForm):
                   'create_Requirements','edit_Requirements','delete_Requirements','manage_VideoModels','create_VideoModels',
                   'edit_VideoModels','delete_VideoModels','manage_Quiz', 'create_Quiz', 'edit_Quiz', 'delete_Quiz'
                   ]
-        
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Categories
+        fields = '__all__'

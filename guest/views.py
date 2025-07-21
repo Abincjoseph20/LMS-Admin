@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .forms import Guest_ProfilePermissionForm
-from .models import Guest_ProfilePermission,Guest
+from .forms import Guest_ProfilePermissionForm,CategoryForm
+from .models import Guest_ProfilePermission,Guest,Categories
+from .decorators import allowed_roles
 from adminapp.models import Account
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -173,7 +174,8 @@ def profile_delete(request):
     if not permissions or not permissions.can_delete:
         messages.error(request, "You do not have permission to delete this profile.")
         return redirect('guest_profile_view')
-
+        
+        
     if request.method == "POST":
         # Check if the confirmation checkbox is checked
         if 'confirm_delete' in request.POST:
@@ -186,3 +188,58 @@ def profile_delete(request):
 
     return render(request, 'confirm_delete.html', {'user': user})
 
+@login_required
+@allowed_roles(['admin_and_instructor'])
+def add_category(request):
+    
+    user = request.user
+    
+    guest = get_object_or_404(Guest, user=user)
+    permissions =Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_categories:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+        
+    
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES)  # Include request.FILES
+        if form.is_valid():
+            category, created = Categories.objects.get_or_create(
+                name=form.cleaned_data['name'],
+                defaults={'icon': form.cleaned_data['icon']}
+            )
+            if created:
+                messages.success(request, "Category added successfully!")
+            else:
+                messages.info(request, "Category already exists.")
+            return redirect('category_list')
+    else:
+        form = CategoryForm()
+        if request.user.roles == 'Guest':
+            template_name = 'guest/category/add_category.html'
+        else:
+            template_name = 'admin/add_category.html'
+            
+    return render(request, template_name, {'form': form})
+
+
+@login_required
+@allowed_roles(['admin_and_instructor'])   #for restricting student
+def category_list(request):
+    user = request.user
+    
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_categories:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    categories = Categories.objects.all()
+    if request.user.roles == 'Guest':
+        template_name = 'guest/category/category_list.html'
+    else:
+        template_name = 'adminapp/category_list.html'
+    
+    return render(request, template_name, {'categories': categories})

@@ -7,8 +7,6 @@ urlpatterns = [
     path('teacher/assign_permissions/<int:user_id>/', views.assign_teacher_permissions, name='assign_teacher_permissions'),
     path('teacher/success_page/<int:user_id>/', views.teacher_success, name='teacher_success_page'),
     path('edit-teacher-permissions/<int:teacher_id>/', views.edit_teacher_permissions, name='edit_teacher_permissions'),
-    # urls.py
-    path('edit-teacher-permissions/<int:teacher_id>/', views.edit_teacher_permissions, name='edit_teacher_permissions'),
     
     path('profile/edit/', views.profile_edit, name='teacher_profile_edit'),
     path('profile/delete/', views.profile_delete, name='teacher_profile_delete'),

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Level
+from .models import Levels as TeacherLevels
 
 # Register your models here.
 
@@ -7,7 +7,7 @@ from.models import Teacher_ProfilePermission,Teacher,Course,VideoModels,UserCour
 
 admin.site.register(Teacher_ProfilePermission) 
 admin.site.register(Teacher) 
-admin.site.register(Level)
+admin.site.register(TeacherLevels)
 admin.site.register(Course)
 admin.site.register(VideoModels)
 admin.site.register(UserCourses)

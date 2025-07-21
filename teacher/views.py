@@ -441,7 +441,8 @@ def update_category(request, category_id):
             template_name = 'admin/update_category.html'
     return render(request, template_name, {'form': form, 'category': category})
 
-
+@login_required
+@allowed_roles(['admin_and_instructor'])
 def delete_category(request, category_id):
         
     user = request.user

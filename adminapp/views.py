@@ -548,3 +548,7 @@ def delete_user(request, user_id):
     except Exception as e:
         messages.error(request, f'Error deleting user: {str(e)}')
     return redirect('all_users_list')
+
+
+def permission_not_assigned(request):
+    return render(request,'no_permission.html')

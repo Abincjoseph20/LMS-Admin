@@ -110,11 +110,6 @@ class Instructor(models.Model): # author in template
     def __str__(self):
         return f"{self.user.username} - (Role: {self.designation})"
 
-class Level(models.Model): #not used
-    name=models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
     
     
     
