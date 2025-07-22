@@ -9,5 +9,10 @@ urlpatterns = [
    
    
    path('guest_add_category/', views.add_category, name='guest_add_category'),
-   path('guest_category_list/', views.category_list, name='guest_category_list'),
+   path('guest_category_list/', views.category_list, name='guest_category_list'), 
+   path('guest_update_category/<int:category_id>/', views.update_category, name='guest_update_category'), 
+   path('guest_delete_category/<int:category_id>/', views.delete_category, name='guest_delete_category'),
+   
+   
+   
 ]

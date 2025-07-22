@@ -243,6 +243,61 @@ def category_list(request):
     if request.user.roles == 'Guest':
         template_name = 'guest/category/category_list.html'
     else:
-        template_name = 'adminapp/category_list.html'
+        template_name = 'guest/category/category_list.html'
     
     return render(request, template_name, {'categories': categories})
+
+
+
+
+@login_required
+@allowed_roles(['admin_and_instructor', 'guest', 'teacher'])
+def update_category(request, category_id):
+    category = get_object_or_404(Categories, id=category_id)  # Fetch the category object
+    
+    user = request.user
+    
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_categories:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        # Initialize the form with POST data, FILES, and bind it to the category instance
+        form = CategoryForm(request.POST, request.FILES, instance=category)
+        if form.is_valid():
+            form.save()  # Save the updated data to the database
+            messages.success(request, "Category updated successfully!")
+            if request.user.roles == 'Guest':
+                return redirect('guest_category_list')
+            else:
+                return redirect('guest_category_list')
+    else:
+        # Pre-fill the form with the current category instance
+        form = CategoryForm(instance=category)
+        if request.user.roles == 'Guest':
+            template_name = 'guest/category/update_catogory.html'
+        else:
+            template_name = 'guest/category/update_catogory.html'
+            
+    return render(request, template_name, {'form': form, 'category': category})
+
+@login_required
+@allowed_roles(['admin_and_instructor', 'guest', 'teacher'])
+def delete_category(request, category_id):
+        
+    user = request.user
+    
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_categories:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    category = get_object_or_404(Categories, id=category_id)
+    category.delete()
+    messages.success(request, "Category deleted successfully!")
+    return redirect('guest_category_list')
