@@ -189,7 +189,7 @@ def profile_delete(request):
     return render(request, 'confirm_delete.html', {'user': user})
 
 @login_required
-@allowed_roles(['admin_and_instructor'])
+@allowed_roles(['admin_and_instructor', 'guest', 'teacher'])
 def add_category(request):
     
     user = request.user
@@ -213,13 +213,16 @@ def add_category(request):
                 messages.success(request, "Category added successfully!")
             else:
                 messages.info(request, "Category already exists.")
-            return redirect('category_list')
+            if request.user.roles == 'Guest':
+                return redirect('guest_category_list')
+            else:
+                return redirect('guest_category_list')
     else:
         form = CategoryForm()
         if request.user.roles == 'Guest':
             template_name = 'guest/category/add_category.html'
         else:
-            template_name = 'admin/add_category.html'
+            template_name = 'guest/category/add_category.html'
             
     return render(request, template_name, {'form': form})
 

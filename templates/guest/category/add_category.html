@@ -1,4 +1,4 @@
-{% extends 'teacher/teacher_dashboard.html' %}
+{% extends 'dashboard/guest_dashboard.html' %}
 {% load static %}
 
 {% block content %}
@@ -10,7 +10,7 @@
             <div class="card mb-4">
                 <h5 class="card-header">Category</h5>
                 <div class="card-body">
-                    <form method="post" action="{% url 'add_category' %}" enctype="multipart/form-data">
+                    <form method="post" action="{% url 'guest_add_category' %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div>
                             <label for="iconInput" class="form-label">Icon</label>
