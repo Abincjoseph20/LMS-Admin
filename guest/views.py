@@ -1,13 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .forms import Guest_ProfilePermissionForm,CategoryForm
-from .models import Guest_ProfilePermission,Guest,Categories
+from django.contrib import messages,admin
+from .forms import Guest_ProfilePermissionForm,CategoryForm,InstructorForm,LevelForm,LanguageForm,CourseForm,LessonForm,CourseResourceForm,WhatULearnForm,RequirementsForm,VideosForm,QuizForm,QuestionForm
+from .models import Guest_ProfilePermission,Guest,Categories,Instructor,Levels,Language,Course,VideoModel,UserCourses,Lesson,CourseResource,What_u_learn,Requirements,VideoModels,Quiz,Question,QuizResult,QuizAnswer,Certificate
 from .decorators import allowed_roles
 from adminapp.models import Account
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from adminapp.models import Account
 from .models import Guest,Guest_ProfilePermission
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView
+from django.db.models.expressions import Func,Value,When,Case
+from django.db.models.functions.mixins import (
+    FixDurationInputMixin,
+    NumericOutputFieldMixin,
+)
+from django.core.exceptions import FieldError,FullResultSet
+from django.db.models import Count
 
 
 def guest_assign_permissions(request, user_id):
@@ -188,6 +196,12 @@ def profile_delete(request):
 
     return render(request, 'confirm_delete.html', {'user': user})
 
+
+
+
+# _category
+
+
 @login_required
 @allowed_roles(['admin_and_instructor', 'guest', 'teacher'])
 def add_category(request):
@@ -243,6 +257,1194 @@ def category_list(request):
     if request.user.roles == 'Guest':
         template_name = 'guest/category/category_list.html'
     else:
-        template_name = 'adminapp/category_list.html'
+        template_name = 'guest/category/category_list.html'
     
     return render(request, template_name, {'categories': categories})
+
+
+
+
+@login_required
+@allowed_roles(['admin_and_instructor', 'guest', 'teacher'])
+def update_category(request, category_id):
+    category = get_object_or_404(Categories, id=category_id)  # Fetch the category object
+    
+    user = request.user
+    
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_categories:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        # Initialize the form with POST data, FILES, and bind it to the category instance
+        form = CategoryForm(request.POST, request.FILES, instance=category)
+        if form.is_valid():
+            form.save()  # Save the updated data to the database
+            messages.success(request, "Category updated successfully!")
+            if request.user.roles == 'Guest':
+                return redirect('guest_category_list')
+            else:
+                return redirect('guest_category_list')
+    else:
+        # Pre-fill the form with the current category instance
+        form = CategoryForm(instance=category)
+        if request.user.roles == 'Guest':
+            template_name = 'guest/category/update_catogory.html'
+        else:
+            template_name = 'guest/category/update_catogory.html'
+            
+    return render(request, template_name, {'form': form, 'category': category})
+
+@login_required
+@allowed_roles(['admin_and_instructor', 'guest', 'teacher'])
+def delete_category(request, category_id):
+        
+    user = request.user
+    
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_categories:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    category = get_object_or_404(Categories, id=category_id)
+    category.delete()
+    messages.success(request, "Category deleted successfully!")
+    return redirect('guest_category_list')
+
+
+
+# create_instructor
+
+
+@login_required
+def create_instructor(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_Instructor:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        # Check if the logged-in user already has an Instructor profile
+        if Instructor.objects.filter(user=request.user).exists():
+            messages.error(request, "You already have an instructor profile.")
+            return redirect('guest_create_instructor')  # Replace with your desired page
+
+        form = InstructorForm(request.POST, request.FILES)
+        if form.is_valid():
+            instructor = form.save(commit=False)
+            instructor.user = request.user 
+            instructor.save()
+            messages.success(request, "Instructor profile created successfully!")
+            return redirect('guest_InstructorListView') 
+        else:
+            messages.error(request, "Please correct the errors below.")
+            return redirect('guest_create_instructor')
+    else:
+        form = InstructorForm()
+
+    return render(request, 'guest/instructor/guest_form.html', {'form': form})
+
+class InstructorListView(LoginRequiredMixin, ListView):
+    
+    model = Instructor
+    template_name = 'guest/instructor/guest_details.html'
+    context_object_name = 'instructor'
+    paginate_by = 10
+
+    def get_queryset(self):
+        # Filter instructors based on the logged-in user
+        return Instructor.objects.filter(user=self.request.user)
+    
+    
+@login_required
+def update_instructor(request,pk):
+    # Fetch the instructor profile of the logged-in user
+    instructor = get_object_or_404(Instructor, pk=pk, user=request.user)
+    
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_Instructor:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+
+    if request.method == 'POST':
+        form = InstructorForm(request.POST, request.FILES, instance=instructor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Instructor profile updated successfully!")
+            return redirect('guest_InstructorListView')  # Replace with your desired page
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = InstructorForm(instance=instructor)
+
+    return render(request, 'guest/instructor/update_guest.html', {'form': form, 'instructor': instructor,})
+
+
+@login_required
+def delete_instructor(request,pk):
+    # Fetch the instructor profile of the logged-in user
+    instructor = get_object_or_404(Instructor, pk=pk, user=request.user)
+    
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_Instructor:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    instructor.delete()
+    messages.success(request, "Instructor profile deleted successfully!")
+    return redirect('guest_InstructorListView')  # Replace with your desired page
+
+
+
+#level
+
+
+def level_list(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Levels:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    levels = Levels.objects.all()
+    return render(request, 'guest/level/guest_level_list.html', {'levels': levels})
+
+# Add new Level
+def add_level(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_Levels:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == "POST":
+        form = LevelForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('guest_level_list')
+    else:
+        form = LevelForm()
+    return render(request, 'guest/level/guest_add_level.html', {'form': form})
+
+
+# Update Level
+def update_level(request, pk):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_Levels:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    level = get_object_or_404(Levels, pk=pk)
+    if request.method == "POST":
+        form = LevelForm(request.POST, instance=level)
+        if form.is_valid():
+            form.save()
+            return redirect('guest_level_list')
+    else:
+        form = LevelForm(instance=level)
+    return render(request, 'guest/level/guest_update_level.html', {'form': form})
+
+
+def delete_level(request, pk):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_Levels:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    level = get_object_or_404(Levels, pk=pk)
+    level.delete()
+    messages.success(request, "Category deleted successfully!")
+    return redirect('guest_level_list')
+
+
+
+
+# Add new Level
+@login_required
+def add_language(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_Language:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == "POST":
+        form = LanguageForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('guest_language_list')
+    else:
+        form = LanguageForm()
+    return render(request, 'guest/language/guest_add_language.html', {'form': form})
+
+
+
+def language_list(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Language:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    language = Language.objects.all()
+    return render(request, 'guest/language/guest_language_list.html', {'language': language})
+
+
+def update_language(request, pk):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_Language:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    language = get_object_or_404(Language, pk=pk)
+    if request.method == "POST":
+        form = LanguageForm(request.POST, instance=language)
+        if form.is_valid():
+            form.save()
+            return redirect('guest_language_list')
+    else:
+        form = LanguageForm(instance=language)
+    return render(request, 'guest/language/guest_update_language.html', {'form': form})
+
+
+def delete_language(request, pk):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_Language:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    level = get_object_or_404(Language, pk=pk)
+    level.delete()
+    messages.success(request, "Category deleted successfully!")
+    return redirect('guest_language_list')
+# END LANGUAGE 
+
+
+
+
+
+
+# START COURSE
+
+class Coalesce(Func):
+    """Return, from left to right, the first non-null expression."""
+
+    function = "COALESCE"
+
+    def __init__(self, *expressions, **extra):
+        if len(expressions) < 2:
+            raise ValueError("Coalesce must take at least two expressions")
+        super().__init__(*expressions, **extra)
+
+    @property
+    def empty_result_set_value(self):
+        for expression in self.get_source_expressions():
+            result = expression.empty_result_set_value
+            if result is NotImplemented or result is not None:
+                return result
+        return None
+
+    def as_oracle(self, compiler, connection, **extra_context):
+        # Oracle prohibits mixing TextField (NCLOB) and CharField (NVARCHAR2),
+        # so convert all fields to NCLOB when that type is expected.
+        if self.output_field.get_internal_type() == "TextField":
+            clone = self.copy()
+            clone.set_source_expressions(
+                [
+                    Func(expression, function="TO_NCLOB")
+                    for expression in self.get_source_expressions()
+                ]
+            )
+            return super(Coalesce, clone).as_sql(compiler, connection, **extra_context)
+        return self.as_sql(compiler, connection, **extra_context)
+
+
+class Aggregate(Func):
+    template = "%(function)s(%(distinct)s%(expressions)s)"
+    contains_aggregate = True
+    name = None
+    filter_template = "%s FILTER (WHERE %%(filter)s)"
+    window_compatible = True
+    allow_distinct = False
+    empty_result_set_value = None
+
+    def __init__(
+        self, *expressions, distinct=False, filter=None, default=None, **extra
+    ):
+        if distinct and not self.allow_distinct:
+            raise TypeError("%s does not allow distinct." % self.__class__.__name__)
+        if default is not None and self.empty_result_set_value is not None:
+            raise TypeError(f"{self.__class__.__name__} does not allow default.")
+        self.distinct = distinct
+        self.filter = filter
+        self.default = default
+        super().__init__(*expressions, **extra)
+
+    def get_source_fields(self):
+        # Don't return the filter expression since it's not a source field.
+        return [e._output_field_or_none for e in super().get_source_expressions()]
+
+    def get_source_expressions(self):
+        source_expressions = super().get_source_expressions()
+        if self.filter:
+            return source_expressions + [self.filter]
+        return source_expressions
+
+    def set_source_expressions(self, exprs):
+        self.filter = self.filter and exprs.pop()
+        return super().set_source_expressions(exprs)
+
+    def resolve_expression(
+        self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False
+    ):
+        # Aggregates are not allowed in UPDATE queries, so ignore for_save
+        c = super().resolve_expression(query, allow_joins, reuse, summarize)
+        c.filter = c.filter and c.filter.resolve_expression(
+            query, allow_joins, reuse, summarize
+        )
+        if summarize:
+            # Summarized aggregates cannot refer to summarized aggregates.
+            for ref in c.get_refs():
+                if query.annotations[ref].is_summary:
+                    raise FieldError(
+                        f"Cannot compute {c.name}('{ref}'): '{ref}' is an aggregate"
+                    )
+        elif not self.is_summary:
+            # Call Aggregate.get_source_expressions() to avoid
+            # returning self.filter and including that in this loop.
+            expressions = super(Aggregate, c).get_source_expressions()
+            for index, expr in enumerate(expressions):
+                if expr.contains_aggregate:
+                    before_resolved = self.get_source_expressions()[index]
+                    name = (
+                        before_resolved.name
+                        if hasattr(before_resolved, "name")
+                        else repr(before_resolved)
+                    )
+                    raise FieldError(
+                        "Cannot compute %s('%s'): '%s' is an aggregate"
+                        % (c.name, name, name)
+                    )
+        if (default := c.default) is None:
+            return c
+        if hasattr(default, "resolve_expression"):
+            default = default.resolve_expression(query, allow_joins, reuse, summarize)
+            if default._output_field_or_none is None:
+                default.output_field = c._output_field_or_none
+        else:
+            default = Value(default, c._output_field_or_none)
+        c.default = None  # Reset the default argument before wrapping.
+        coalesce = Coalesce(c, default, output_field=c._output_field_or_none)
+        coalesce.is_summary = c.is_summary
+        return coalesce
+
+    @property
+    def default_alias(self):
+        expressions = self.get_source_expressions()
+        if len(expressions) == 1 and hasattr(expressions[0], "name"):
+            return "%s__%s" % (expressions[0].name, self.name.lower())
+        raise TypeError("Complex expressions require an alias")
+
+    def get_group_by_cols(self):
+        return []
+
+    def as_sql(self, compiler, connection, **extra_context):
+        extra_context["distinct"] = "DISTINCT " if self.distinct else ""
+        if self.filter:
+            if connection.features.supports_aggregate_filter_clause:
+                try:
+                    filter_sql, filter_params = self.filter.as_sql(compiler, connection)
+                except FullResultSet:
+                    pass
+                else:
+                    template = self.filter_template % extra_context.get(
+                        "template", self.template
+                    )
+                    sql, params = super().as_sql(
+                        compiler,
+                        connection,
+                        template=template,
+                        filter=filter_sql,
+                        **extra_context,
+                    )
+                    return sql, (*params, *filter_params)
+            else:
+                copy = self.copy()
+                copy.filter = None
+                source_expressions = copy.get_source_expressions()
+                condition = When(self.filter, then=source_expressions[0])
+                copy.set_source_expressions([Case(condition)] + source_expressions[1:])
+                return super(Aggregate, copy).as_sql(
+                    compiler, connection, **extra_context
+                )
+        return super().as_sql(compiler, connection, **extra_context)
+
+    def _get_repr_options(self):
+        options = super()._get_repr_options()
+        if self.distinct:
+            options["distinct"] = self.distinct
+        if self.filter:
+            options["filter"] = self.filter
+        return options
+
+@login_required
+def add_course(request):
+    
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_Course:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        form = CourseForm(request.POST, request.FILES, user=request.user)  # Pass user to the form
+        if form.is_valid():
+            course = form.save(commit=False)
+            instructor = Instructor.objects.filter(user=request.user).first()  # Fetch the current instructor
+            if instructor:
+                course.author = instructor
+                course.save()
+                messages.success(request, "Course added successfully!")
+                return redirect('guest_course_list')
+            else:
+                messages.error(request, "You are not an instructor. Please contact the admin.")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = CourseForm(user=request.user)  # Pass user to the form
+    
+    instructor = Instructor.objects.filter(user=request.user).first()
+    return render(request, 'guest/course/guest_add_course.html', {'form': form, 'instructor': instructor})
+
+@login_required
+def course_list(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Course:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    # Filter courses where the author is the currently logged-in user
+    courses = Course.objects.filter(author__user=request.user)
+    return render(request, 'guest/course/guest_course_list.html', {'courses': courses})
+
+class Sum(FixDurationInputMixin, Aggregate):
+    function = "SUM"
+    name = "Sum"
+    allow_distinct = True
+
+
+def get_course_data(course_id, user=None):
+    """
+    
+    Retrieves course details, lessons, and video progress. used in course_detail and WATCH_COURSE
+    
+    """
+    course = get_object_or_404(Course, pk=course_id)
+    course_time_duration = VideoModel.objects.filter(course=course).aggregate(sum=Sum('time_duration'))
+    lessons = course.lesson_set.annotate(total_duration=Sum('videomodel__time_duration'))
+
+    category = Categories.objects.all().order_by('id')[0:6] #category on nav bar 
+
+    check_enroll = None
+    
+
+    if user and user.is_authenticated:
+        check_enroll = UserCourses.objects.filter(user=user, course=course).first()
+        
+    return {
+        'course': course,
+        'course_time_duration': course_time_duration,
+        'lessons': lessons,
+        'check_enroll': check_enroll,
+        'category':category
+    }
+
+
+def course_detail(request, course_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Course:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    course_data = get_course_data(course_id, request.user)   # another function, place just above
+    return render(request, 'guest/course/guest_course-details.html', course_data)
+
+@login_required
+def update_course(request, course_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_Course:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    course = get_object_or_404(Course, id=course_id)
+    if request.method == 'POST':
+        form = CourseForm(request.POST, request.FILES, instance=course)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Course updated successfully!")
+            return redirect('guest_course_list')
+    else:
+        form = CourseForm(instance=course)
+        # print(course.author)
+        # print(form)
+    return render(request, 'guest/course/guest_update_coruse.html', {'form': form,'course':course})
+
+@login_required
+def delete_course(request, course_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_Course:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    course = get_object_or_404(Course, id=course_id)
+    if request.method == 'POST':
+        course.delete()
+        messages.success(request, "Course deleted successfully!")
+        return redirect('guest_course_list')
+    return render(request, 'guest/courses/guest_course_confirm_delete.html', {'course': course})
+
+
+
+# Add a lesson
+@login_required
+def add_lesson(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_Lesson:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    if request.method == 'POST':
+        form = LessonForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Lesson added successfully!")
+            return redirect('guest_lesson_list')
+    else:
+        form = LessonForm(user = request.user)
+    return render(request, 'guest/lesson/guest_add_lesson.html', {'form': form})
+
+# Display all lessons
+@login_required
+def lesson_list(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Lesson:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    try:
+        auther = Instructor.objects.get( user = request.user)
+        my_course = Course.objects.filter(author = auther)
+        lessons = Lesson.objects.filter(course__in= my_course)
+        return render(request, 'guest/lesson/guest_lesson_list.html', {'lessons': lessons})
+    except:
+        return render(request, 'guest/lesson/guest_lesson_list.html')
+    
+
+# Update a lesson
+def update_lesson(request, lesson_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_Lesson:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    if request.method == 'POST':
+        form = LessonForm(request.POST, instance=lesson)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Lesson updated successfully!")
+            return redirect('guest_lesson_list')
+    else:
+        form = LessonForm(instance=lesson, user = request.user)
+    return render(request, 'guest/lesson/guest_update_lesson.html', {'form': form})
+
+# Delete a lesson
+def delete_lesson(request, lesson_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_Lesson:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    if request.method == 'POST':
+        lesson.delete()
+        messages.success(request, "Lesson deleted successfully!")
+    return redirect('guest_lesson_list')
+
+
+
+
+# START Course Resources
+def add_course_resource(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_CourseResource:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        form = CourseResourceForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Resource added successfully!")
+            return redirect('guest_resource_list')
+    else:
+        form = CourseResourceForm(user = request.user)
+    return render(request, 'guest/course_resource/guest_add_resource.html', {'form': form})
+
+
+def resource_list(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_CourseResource:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    try:
+        auther = Instructor.objects.get( user = request.user)
+        my_courses = Course.objects.filter(author = auther)
+        resource = CourseResource.objects.filter(course__in= my_courses)
+        context = {'resources' : resource}
+    except:
+        context = {'resources' : None}
+    return render(request, 'guest/course_resource/guest_resource_list.html', context)
+
+@login_required
+def update_course_resource(request, resource_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_CourseResource:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    resource = get_object_or_404(CourseResource, id=resource_id)
+    if request.method == 'POST':
+        form = CourseResourceForm(request.POST, request.FILES, instance=resource)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Resource updated successfully!")
+            return redirect('guest_resource_list')
+    else:
+        form = CourseResourceForm(instance=resource, user = request.user)
+    return render(request, 'guest/course_resource/guest_update_resource.html', {'form': form})
+
+@login_required
+def delete_course_resource(request, resource_id):
+    
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_CourseResource:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    resource = get_object_or_404(CourseResource, id=resource_id)
+    resource.delete()
+    messages.success(request, "Resource deleted successfully!")
+    return redirect('guest_resource_list')
+
+
+
+
+#what u learn
+
+def add_what_u_learn(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_What_u_learn:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        form = WhatULearnForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Points learned added successfully!")
+            return redirect('guest_what_u_learn_list')
+    else:
+        form = WhatULearnForm()
+    return render(request, 'guest/what_u_learn/guest_add_what_u_learn.html', {'form': form})
+
+
+def what_u_learn_list(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_What_u_learn:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    what_u_learn_entries = What_u_learn.objects.all()
+    return render(request, 'guest/what_u_learn/guest_what_u_learn_list.html', {'what_u_learn_entries': what_u_learn_entries})
+
+
+def update_what_u_learn(request, entry_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_What_u_learn:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    entry = get_object_or_404(What_u_learn, id=entry_id)
+    if request.method == 'POST':
+        form = WhatULearnForm(request.POST, instance=entry)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Points learned updated successfully!")
+            return redirect('guest_what_u_learn_list')
+    else:
+        form = WhatULearnForm(instance=entry)
+    return render(request, 'guest/what_u_learn/guest_update_what_u_learn.html', {'form': form})
+
+
+def delete_what_u_learn(request, entry_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_What_u_learn:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        entry = get_object_or_404(What_u_learn, id=entry_id)
+        entry.delete()
+        messages.success(request, "Points learned deleted successfully!")
+    return redirect('guest_what_u_learn_list')
+
+
+
+
+
+#requirement
+def add_requirement(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_Requirements:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        form = RequirementsForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Requirement added successfully!")
+            return redirect('guest_requirement_list')
+    else:
+        form = RequirementsForm(user = request.user)
+    return render(request, 'guest/requirement/guest_add_requirement.html', {'form': form})
+
+def requirement_list(request):
+    
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Requirements:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    try:
+        auther = Instructor.objects.get( user = request.user)
+        my_courses = Course.objects.filter(author = auther)
+        requirement = Requirements.objects.filter(course__in= my_courses)
+        context = {'requirements' : requirement}
+    except:
+        context = {'requirements' : None}
+    return render(request, 'guest/requirement/guest_requirement_list.html', context)
+
+def update_requirement(request, requirement_id):
+    requirement = get_object_or_404(Requirements, id=requirement_id)
+    user = request.user
+
+    guest= get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_Requirements:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        form = RequirementsForm(request.POST, instance=requirement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Requirement updated successfully!")
+            return redirect('guest_requirement_list')
+    else:
+        form = RequirementsForm(instance=requirement, user = request.user)
+    return render(request, 'guest/requirement/guest_update_requirement.html', {'form': form})
+
+def delete_requirement(request, requirement_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_Requirements:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    requirement = get_object_or_404(Requirements, id=requirement_id)
+    if request.method == 'POST':
+        requirement.delete()
+        messages.success(request, "Requirement deleted successfully!")
+    return redirect('guest_requirement_list')    
+
+
+
+
+# Create a video
+def create_video(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_VideoModels:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        form = VideosForm(request.POST, request.FILES,user=request.user )
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Video added successfully!")
+            return redirect('guest_view_video')
+    else:
+        print('video not added')
+        form = VideosForm(user = request.user)
+    return render(request, 'guest/video/guest_create_video.html', {'form': form})
+
+# list a video
+def view_video(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_VideoModels:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    try:
+        auther = Instructor.objects.get( user = request.user)
+        print("Instructor:", auther)
+        my_course = Course.objects.filter(author = auther)
+        print("Courses for instructor:", my_course)
+        videos = VideoModels.objects.filter(course__in = my_course)
+        print("Videos for courses:", videos)
+        context = {'videos' : videos}
+    except:
+        context = {'videos' : None}
+        print("No instructor found or error in fetching videos")
+    return render(request, 'guest/video/guest_view_video.html', context)
+
+# update a video
+def video_update(request, video_id):
+    video = get_object_or_404(VideoModels, id=video_id)
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_VideoModels:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        form = VideosForm(request.POST, request.FILES, instance=video,user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Video updated successfully!")
+            return redirect('guest_view_video')
+    else:
+        form = VideosForm(instance=video, user = request.user)
+    return render(request, 'guest/video/guest_video_update.html', {'form': form})
+
+# Delete a video
+def delete_videos(request, video_id):
+    video = get_object_or_404(VideoModels, id=video_id)
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_VideoModels:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        video.delete()
+        messages.success(request, "Video deleted successfully!")
+    return redirect('guest_view_video')
+
+
+
+
+#quez
+def create_quiz(request):
+    # course = get_object_or_404(Course, id=course_id)
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_Quiz:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        quiz_form = QuizForm(request.POST)
+        if quiz_form.is_valid():
+            quiz = quiz_form.save()  # Save the quiz instance
+            return redirect('guest_add_questions', quiz_id=quiz.id)  # Redirect to the page to add questions
+    else:
+        quiz_form = QuizForm(user = request.user)
+    return render(request, 'guest/quiz/guest_create_quiz.html', {'quiz_form': quiz_form})
+
+
+def add_questions(request, quiz_id):
+    quiz = get_object_or_404(Quiz,id=quiz_id)
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Quiz:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        question_form = QuestionForm(request.POST, quiz=quiz)  # Pass quiz to the form
+        if question_form.is_valid():
+            question = question_form.save(commit=False)
+            question.quiz = quiz  # Explicitly set the quiz for the question
+            question.save()
+            return redirect('guest_add_questions', quiz_id=quiz.id)  # Redirect to add another question or finish
+    else:
+        question_form = QuestionForm(initial={'quiz': quiz}, quiz=quiz)  # Pre-fill the quiz field and limit queryset    
+    return render(request, 'guest/quiz/guest_add_questions.html', {'question_form': question_form, 'quiz': quiz})
+
+
+def list_quiz(request):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Quiz:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    try:
+        auther = Instructor.objects.get( user = request.user)
+        my_courses = Course.objects.filter(author = auther)
+        quizzes = Quiz.objects.filter(course__in= my_courses)
+        
+        
+        context = {'quizzes' : quizzes}
+    except:
+        context = {'quizzes' : None}
+    
+    
+    return render(request, 'guest/quiz/guest_list_quiz.html', context)
+
+def delete_quiz(request,quiz_id):
+    
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.delete_Quiz:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    quiz = get_object_or_404(Quiz,id=quiz_id)
+    quiz.delete()
+    messages.success(request, "Quiz deleted successfully!")
+    return redirect('guest_list_quiz')
+
+def edit_quiz(request,quiz_id):
+    quiz = get_object_or_404(Quiz,id=quiz_id)
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.edit_Quiz:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    if request.method == 'POST':
+        quiz_form = QuizForm(request.POST, instance = quiz )
+        if quiz_form.is_valid():
+            quiz_form.save()
+            messages.success(request, "Quiz edited successfully!")
+            return redirect('guest_add_questions', quiz_id=quiz.id)
+    else:
+        quiz_form = QuizForm( instance = quiz, user = request.user )
+    return render(request, 'guest/quiz/guest_edit_quiz.html', {'quiz_form':quiz_form} )
+
+
+
+
+def get_quiz_results_for_course(request, quiz_id):
+    # Step 1: Get the quiz for the given course (assuming there's one quiz per course)
+    quiz = get_object_or_404(Quiz, id=quiz_id) 
+    
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.manage_Quiz:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    quiz_results = QuizResult.objects.filter(quiz=quiz).select_related('quiz')
+
+    return render(request, 'guest/quiz/guest_quiz_results.html', {'quiz_results':quiz_results} )
+
+def verify_result(request, quiz_result_id):
+    user = request.user
+
+    guest = get_object_or_404(Guest, user=user)
+    permissions = Guest_ProfilePermission.objects.filter(guest=guest).first()
+    
+    if not permissions or not permissions.create_Language:
+        messages.error(request, "You do not have permission to delete this profile.")
+        return redirect('profile_view')
+    
+    quiz_result = get_object_or_404(QuizResult, id=quiz_result_id)
+    certificate_obj, created =  Certificate.objects.get_or_create(
+                quiz_result = quiz_result,
+                verified = True,
+            )
+    print('reached')
+    return redirect('guest_quiz_results', quiz_id = quiz_result.quiz.id)
+
+
+def get_top_instructors():
+    top_instructors = (
+        Account.objects.filter(role='instructor')
+        .annotate(course_count=Count('instructor__course'))
+        .order_by('-course_count')[:4]
+    )
+    return top_instructors
+
+class CategoriesAdmin(admin.ModelAdmin):
+    pass
+
+# admin.site.register(Categories, CategoriesAdmin) 
+
+# class InstructorListView(LoginRequiredMixin, ListView):
+#     model = Instructor
+#     template_name = 'teacher/teacher_details.html'
+#     context_object_name = 'instructor'
+#     paginate_by = 10
+
+#     def get_queryset(self):
+#         # Filter instructors based on the logged-in user
+#         return Instructor.objects.filter(user=self.request.user)
