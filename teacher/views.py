@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
+from django.contrib import messages,admin
 from .models import  Teacher,Teacher_ProfilePermission,Categories,Lesson,Instructor,Levels,Language,Course,VideoModel,UserCourses,CourseResource,What_u_learn,Requirements,VideoModels,Quiz,QuizResult,Certificate
 from adminapp.models import Account
 from .forms import Teacher_ProfilePermissionForm,CategoryForm,InstructorForm,LevelForm,LanguageForm,CourseForm,LessonForm,CourseResourceForm,WhatULearnForm,RequirementsForm,VideosForm,QuizForm,QuestionForm
@@ -16,7 +16,7 @@ from django.db.models.functions.mixins import (
 from .models import Teacher, Teacher_ProfilePermission
 from teacher.models import UserCourses, Course,Categories
 from django.db.models import Count
-from django.contrib import admin
+
 
 
 def assign_teacher_permissions(request, user_id):
@@ -1250,7 +1250,7 @@ def delete_what_u_learn(request, entry_id):
 
 
 
-
+#requirement
 def add_requirement(request):
     user = request.user
 
