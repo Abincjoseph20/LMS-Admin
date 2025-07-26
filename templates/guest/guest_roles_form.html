@@ -1,46 +1,39 @@
+<!-- templates/teacher_role_forms.html -->
+<h2 class="section-title">Assign General Permission to Teacher</h2>
+<p>User ID: {{ user.id }}</p>
+<form method="POST" action="{% url 'assign_teacher_permissions' user.pk %}">
+    {% csrf_token %}
 
-        <!-- Section Title -->
-        <h2 class="section-title">Assign General Permission to Teacher</h2>
-        <p>User ID: {{ user.id }}</p>
-        <form method="POST" action="{% url 'guest_assign_permissions' user.pk %}">
-            {% csrf_token %}
-        
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 5%;"><input type="checkbox" id="select-all"></th>
-                        <th style="width: 25%;">MODULE</th>
-                        <th style="width: 70%;">PERMISSIONS</th>
-                    </tr>
-                </thead>
-                <tbody>
-
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;"><input type="checkbox" id="select-all"></th>
+                <th style="width: 25%;">MODULE</th>
+                <th style="width: 70%;">PERMISSIONS</th>
+            </tr>
+        </thead>
+        <tbody>
             <!-- Profile Permissions -->
             <tr>
                 <td class="checkbox-container">
-
                     <input type="checkbox" class="module-checkbox" name="module" value="profile">
                 </td>
                 <td>Profile</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" class="permission-checkbox" name="can_manage" value="True"
-                            {% if user.profile_permissions.first.can_manage %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="can_manage" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" class="permission-checkbox" name="can_create" value="True"
-                            {% if user.profile_permissions.first.can_create %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="can_create" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" class="permission-checkbox" name="can_edit" value="True"
-                            {% if user.profile_permissions.first.can_edit %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="can_edit" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" class="permission-checkbox" name="can_delete" value="True"
-                            {% if user.profile_permissions.first.can_delete %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="can_delete" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -52,23 +45,19 @@
                 <td>Categories</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_categories" value="True"
-                            {% if user.profile_permissions.first.manage_categories %}checked{% endif %}>
-                        <label> Manage</label>
+                        <input type="checkbox" class="permission-checkbox" name="manage_categories" value="True">
+                        <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_categories" value="True"
-                            {% if user.profile_permissions.first.create_categories %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_categories" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_categories" value="True"
-                            {% if user.profile_permissions.first.edit_categories %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_categories" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_categories" value="True"
-                            {% if user.profile_permissions.first.delete_categories %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_categories" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -80,23 +69,19 @@
                 <td>Instructors</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_Instructor" value="True"
-                            {% if user.profile_permissions.first.manage_Instructor %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_Instructor" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_Instructor" value="True"
-                            {% if user.profile_permissions.first.create_Instructor %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_Instructor" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_Instructor" value="True"
-                            {% if user.profile_permissions.first.edit_Instructor %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_Instructor" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_Instructor" value="True"
-                            {% if user.profile_permissions.first.delete_Instructor %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_Instructor" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -108,23 +93,19 @@
                 <td>Levels</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_Levels" value="True"
-                            {% if user.profile_permissions.first.manage_Levels %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_Levels" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_Levels" value="True"
-                            {% if user.profile_permissions.first.create_Levels %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_Levels" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_Levels" value="True"
-                            {% if user.profile_permissions.first.edit_Levels %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_Levels" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_Levels" value="True"
-                            {% if user.profile_permissions.first.delete_Levels %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_Levels" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -136,23 +117,19 @@
                 <td>Language</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_Language" value="True"
-                            {% if user.profile_permissions.first.manage_Language %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_Language" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_Language" value="True"
-                            {% if user.profile_permissions.first.create_Language %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_Language" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_Language" value="True"
-                            {% if user.profile_permissions.first.edit_Language %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_Language" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_Language" value="True"
-                            {% if user.profile_permissions.first.delete_Language %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_Language" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -164,23 +141,19 @@
                 <td>Course</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_Course" value="True"
-                            {% if user.profile_permissions.first.manage_Course %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_Course" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_Course" value="True"
-                            {% if user.profile_permissions.first.create_Course %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_Course" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_Course" value="True"
-                            {% if user.profile_permissions.first.edit_Course %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_Course" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_Course" value="True"
-                            {% if user.profile_permissions.first.delete_Course %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_Course" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -192,23 +165,19 @@
                 <td>Lesson</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_Lesson" value="True"
-                            {% if user.profile_permissions.first.manage_Lesson %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_Lesson" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_Lesson" value="True"
-                            {% if user.profile_permissions.first.create_Lesson %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_Lesson" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_Lesson" value="True"
-                            {% if user.profile_permissions.first.edit_Lesson %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_Lesson" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_Lesson" value="True"
-                            {% if user.profile_permissions.first.delete_Lesson %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_Lesson" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -220,23 +189,19 @@
                 <td>CourseResource</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_CourseResource" value="True"
-                            {% if user.profile_permissions.first.manage_CourseResource %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_CourseResource" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_CourseResource" value="True"
-                            {% if user.profile_permissions.first.create_CourseResource %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_CourseResource" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_CourseResource" value="True"
-                            {% if user.profile_permissions.first.edit_CourseResource %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_CourseResource" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_CourseResource" value="True"
-                            {% if user.profile_permissions.first.delete_CourseResource %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_CourseResource" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -248,23 +213,19 @@
                 <td>What_u_learn</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_What_u_learn" value="True"
-                            {% if user.profile_permissions.first.manage_What_u_learn %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_What_u_learn" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_What_u_learn" value="True"
-                            {% if user.profile_permissions.first.create_What_u_learn %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_What_u_learn" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_What_u_learn" value="True"
-                            {% if user.profile_permissions.first.edit_What_u_learn %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_What_u_learn" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_What_u_learn" value="True"
-                            {% if user.profile_permissions.first.delete_What_u_learn %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_What_u_learn" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -276,23 +237,19 @@
                 <td>Requirements</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_Requirements" value="True"
-                            {% if user.profile_permissions.first.manage_Requirements %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_Requirements" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_Requirements" value="True"
-                            {% if user.profile_permissions.first.create_Requirements %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_Requirements" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_Requirements" value="True"
-                            {% if user.profile_permissions.first.edit_Requirements %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_Requirements" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_Requirements" value="True"
-                            {% if user.profile_permissions.first.delete_Requirements %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_Requirements" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -304,23 +261,19 @@
                 <td>VideoModels</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_VideoModels" value="True"
-                            {% if user.profile_permissions.first.manage_VideoModels %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_VideoModels" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_VideoModels" value="True"
-                            {% if user.profile_permissions.first.create_VideoModels %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_VideoModels" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_VideoModels" value="True"
-                            {% if user.profile_permissions.first.edit_VideoModels %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_VideoModels" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_VideoModels" value="True"
-                            {% if user.profile_permissions.first.delete_VideoModels %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_VideoModels" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
@@ -332,98 +285,92 @@
                 <td>Quiz</td>
                 <td class="permission-column">
                     <div class="permission-item">
-                        <input type="checkbox" name="manage_Quiz" value="True"
-                            {% if user.profile_permissions.first.manage_Quiz %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="manage_Quiz" value="True">
                         <label>Manage</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="create_Quiz" value="True"
-                            {% if user.profile_permissions.first.create_Quiz %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="create_Quiz" value="True">
                         <label>Create</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="edit_Quiz" value="True"
-                            {% if user.profile_permissions.first.edit_Quiz %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="edit_Quiz" value="True">
                         <label>Edit</label>
                     </div>
                     <div class="permission-item">
-                        <input type="checkbox" name="delete_Quiz" value="True"
-                            {% if user.profile_permissions.first.delete_Quiz %}checked{% endif %}>
+                        <input type="checkbox" class="permission-checkbox" name="delete_Quiz" value="True">
                         <label>Delete</label>
                     </div>
                 </td>
             </tr>
         </tbody>
+    </table>
+
+    <button type="submit" class="submit-btn">Assign Permissions</button>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Get all module checkboxes
+        const moduleCheckboxes = document.querySelectorAll(".module-checkbox");
+
+        moduleCheckboxes.forEach(function (moduleCheckbox) {
+            moduleCheckbox.addEventListener("change", function () {
+                const row = this.closest("tr");
+                // Get all permission checkboxes in this row
+                const permissionCheckboxes = row.querySelectorAll(".permission-checkbox");
+
+                // Set all permission checkboxes to match the module checkbox state
+                permissionCheckboxes.forEach(function (checkbox) {
+                    checkbox.checked = moduleCheckbox.checked;
+                });
+            });
+        });
+
+        // Optional: Select All functionality at the top
+        const selectAll = document.getElementById("select-all");
+        if (selectAll) {
+            selectAll.addEventListener("change", function () {
+                // Toggle all module checkboxes
+                moduleCheckboxes.forEach(function (moduleCheckbox) {
+                    moduleCheckbox.checked = selectAll.checked;
+                    
+                    // Also toggle all their associated permission checkboxes
+                    const row = moduleCheckbox.closest("tr");
+                    const permissionCheckboxes = row.querySelectorAll(".permission-checkbox");
+
+                    permissionCheckboxes.forEach(function (checkbox) {
+                        checkbox.checked = selectAll.checked;
+                    });
+                });
+            });
+        }
+
+        // Optional: Update module checkbox when individual permissions are changed
+        const allPermissionCheckboxes = document.querySelectorAll(".permission-checkbox");
+        allPermissionCheckboxes.forEach(function(permissionCheckbox) {
+            permissionCheckbox.addEventListener("change", function() {
+                const row = this.closest("tr");
+                const moduleCheckbox = row.querySelector(".module-checkbox");
+                const permissionCheckboxes = row.querySelectorAll(".permission-checkbox");
                 
-            </table>
-        
-            <button type="submit" class="submit-btn">Assign Permissions</button>
-        
-            {% with user.profile_permissions.first as permission %}
-              {% if permission %}
-               <ul>
-                    <li>Can Manage: {{ permission.can_manage|yesno:"Yes,No" }}</li>
-                    <li>Can Create: {{ permission.can_create|yesno:"Yes,No" }}</li>
-                    <li>Can Edit: {{ permission.can_edit|yesno:"Yes,No" }}</li>
-                    <li>Can Delete: {{ permission.can_delete|yesno:"Yes,No" }}</li>
+                // Check if all permissions in this row are checked
+                const allChecked = Array.from(permissionCheckboxes).every(checkbox => checkbox.checked);
+                // Check if any permissions in this row are checked
+                const anyChecked = Array.from(permissionCheckboxes).some(checkbox => checkbox.checked);
+                
+                // Update module checkbox state
+                if (allChecked) {
+                    moduleCheckbox.checked = true;
+                    moduleCheckbox.indeterminate = false;
+                } else if (anyChecked) {
+                    moduleCheckbox.checked = false;
+                    moduleCheckbox.indeterminate = true; // Shows partially selected state
+                } else {
+                    moduleCheckbox.checked = false;
+                    moduleCheckbox.indeterminate = false;
+                }
+            });
+        });
+    });
+    </script>
 
-                    <li>Manage Categories: {{ permission.manage_categories|yesno:"Yes,No" }}</li>
-                    <li>Create Categories: {{ permission.create_categories|yesno:"Yes,No" }}</li>
-                    <li>Edit Categories: {{ permission.edit_categories|yesno:"Yes,No" }}</li>
-                    <li>Delete Categories: {{ permission.delete_categories|yesno:"Yes,No" }}</li>
-
-                    <li>Manage Instructor: {{ permission.manage_Instructor|yesno:"Yes,No" }}</li>
-                    <li>Create Instructor: {{ permission.create_Instructor|yesno:"Yes,No" }}</li>
-                    <li>Edit Instructor: {{ permission.edit_Instructor|yesno:"Yes,No" }}</li>
-                    <li>Delete Instructor: {{ permission.delete_Instructor|yesno:"Yes,No" }}</li>
-
-                    <li>Manage Levels: {{ permission.manage_Levels|yesno:"Yes,No" }}</li>
-                    <li>Create Levels: {{ permission.create_Levels|yesno:"Yes,No" }}</li>
-                    <li>Edit Levels: {{ permission.edit_Levels|yesno:"Yes,No" }}</li>
-                    <li>Delete Levels: {{ permission.delete_Levels|yesno:"Yes,No" }}</li>
-
-                    <li>Manage Language: {{ permission.manage_Language|yesno:"Yes,No" }}</li>
-                    <li>Create Language: {{ permission.create_Language|yesno:"Yes,No" }}</li>
-                    <li>Edit Language: {{ permission.edit_Language|yesno:"Yes,No" }}</li>
-                    <li>Delete Language: {{ permission.delete_Language|yesno:"Yes,No" }}</li>
-
-                    <li>Manage Course: {{ permission.manage_Course|yesno:"Yes,No" }}</li>
-                    <li>Create Course: {{ permission.create_Course|yesno:"Yes,No" }}</li>
-                    <li>Edit Course: {{ permission.edit_Course|yesno:"Yes,No" }}</li>
-                    <li>Delete Course: {{ permission.delete_Course|yesno:"Yes,No" }}</li>
-
-                    <li>Manage Lesson: {{ permission.manage_Lesson|yesno:"Yes,No" }}</li>
-                    <li>Create Lesson: {{ permission.create_Lesson|yesno:"Yes,No" }}</li>
-                    <li>Edit Lesson: {{ permission.edit_Lesson|yesno:"Yes,No" }}</li>
-                    <li>Delete Lesson: {{ permission.delete_Lesson|yesno:"Yes,No" }}</li>
-
-                    <li>Manage CourseResource: {{ permission.manage_CourseResource|yesno:"Yes,No" }}</li>
-                    <li>Create CourseResource: {{ permission.create_CourseResource|yesno:"Yes,No" }}</li>
-                    <li>Edit CourseResource: {{ permission.edit_CourseResource|yesno:"Yes,No" }}</li>
-                    <li>Delete CourseResource: {{ permission.delete_CourseResource|yesno:"Yes,No" }}</li>
-
-                    <li>Manage What_u_learn: {{ permission.manage_What_u_learn|yesno:"Yes,No" }}</li>
-                    <li>Create What_u_learn: {{ permission.create_What_u_learn|yesno:"Yes,No" }}</li>
-                    <li>Edit What_u_learn: {{ permission.edit_What_u_learn|yesno:"Yes,No" }}</li>
-                    <li>Delete What_u_learn: {{ permission.delete_What_u_learn|yesno:"Yes,No" }}</li>
-
-                    <li>Manage Requirements: {{ permission.manage_Requirements|yesno:"Yes,No" }}</li>
-                    <li>Create Requirements: {{ permission.create_Requirements|yesno:"Yes,No" }}</li>
-                    <li>Edit Requirements: {{ permission.edit_Requirements|yesno:"Yes,No" }}</li>
-                    <li>Delete Requirements: {{ permission.delete_Requirements|yesno:"Yes,No" }}</li>
-
-                    <li>Manage VideoModels: {{ permission.manage_VideoModels|yesno:"Yes,No" }}</li>
-                    <li>Create VideoModels: {{ permission.create_VideoModels|yesno:"Yes,No" }}</li>
-                    <li>Edit VideoModels: {{ permission.edit_VideoModels|yesno:"Yes,No" }}</li>
-                    <li>Delete VideoModels: {{ permission.delete_VideoModels|yesno:"Yes,No" }}</li>
-
-                    <li>Manage Quiz: {{ permission.manage_Quiz|yesno:"Yes,No" }}</li>
-                    <li>Create Quiz: {{ permission.create_Quiz|yesno:"Yes,No" }}</li>
-                    <li>Edit Quiz: {{ permission.edit_Quiz|yesno:"Yes,No" }}</li>
-                    <li>Delete Quiz: {{ permission.delete_Quiz|yesno:"Yes,No" }}</li>
-                </ul>
-            {% endif %}
-            {% endwith %}
-        
-        </form>
-        
+</form>
