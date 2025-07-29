@@ -436,9 +436,9 @@ def update_category(request, category_id):
         # Pre-fill the form with the current category instance
         form = CategoryForm(instance=category)
         if request.user.roles == 'Teacher':
-            template_name = 'teacher/category/update_category.html'
+            template_name = 'teacher/category/update_catogory.html'
         else:
-            template_name = 'admin/update_category.html'
+            template_name = 'admin/update_catogory.html'
     return render(request, template_name, {'form': form, 'category': category})
 
 @login_required
